@@ -9,7 +9,7 @@ setup(name='tap-exchangeratesapi',
       url='http://singer.io',
       classifiers=['Programming Language :: Python :: 3 :: Only'],
       py_modules=['tap_exchangeratesapi'],
-      install_requires=['singer-python>=0.1.0',
+      install_requires=['singer-python>=5.1.0',
                         'backoff==1.3.2',
                         'requests==2.13.0'],
       entry_points='''
