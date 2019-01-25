@@ -61,7 +61,8 @@ def do_sync(base, start_date):
             if datetime.strptime(next_date, DATE_FORMAT) > datetime.utcnow():
                 break
             else:
-                singer.write_records('exchange_rate', [parse_response(payload)])
+                if payload['date'] == next_date:
+                    singer.write_records('exchange_rate', [parse_response(payload)])
                 state = {'start_date': next_date}
                 next_date = (datetime.strptime(next_date, DATE_FORMAT) + timedelta(days=1)).strftime(DATE_FORMAT)
 
