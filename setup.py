@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(name='tap-exchangeratesapi',
-      version='0.0.3',
+      version='0.1.0',
       description='Singer.io tap for extracting currency exchange rate data from the exchangeratesapi.io API',
       author='Stitch',
       url='http://singer.io',
