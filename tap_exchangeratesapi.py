@@ -28,7 +28,7 @@ schema = {'type': 'object',
           'properties':
           {'date': {'type': 'string',
                     'format': 'date-time'}},
-          'additionalProperties': True}
+          'additionalProperties': False}
 
 def giveup(error):
     logger.error(error.response.text)
