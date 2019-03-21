@@ -7,6 +7,7 @@ import time
 import requests
 import singer
 import backoff
+import copy
 
 from datetime import date, datetime, timedelta
 
@@ -26,8 +27,7 @@ def parse_response(r):
 schema = {'type': 'object',
           'properties':
           {'date': {'type': 'string',
-                    'format': 'date-time'}},
-          'additionalProperties': True}
+                    'format': 'date-time'}}}
 
 def giveup(error):
     logger.error(error.response.text)
@@ -48,22 +48,31 @@ def request(url, params):
     
 def do_sync(base, start_date):
     logger.info('Replicating exchange rate data from exchangeratesapi.io starting from {}'.format(start_date))
-    singer.write_schema('exchange_rate', schema, 'date')
 
     state = {'start_date': start_date}
     next_date = start_date
+    prev_schema = {}
     
     try:
-        while True:
+        while datetime.strptime(next_date, DATE_FORMAT) <= datetime.utcnow():
             response = request(base_url + next_date, {'base': base})
             payload = response.json()
 
-            if datetime.strptime(next_date, DATE_FORMAT) > datetime.utcnow():
-                break
-            else:
+            # Update schema if new currency/currencies exist
+            for rate in payload['rates']:
+                if rate not in schema['properties']:
+                    schema['properties'][rate] = {'type': ['null', 'number']}
+
+            # Only write schema if it has changed
+            if schema != prev_schema:
+                singer.write_schema('exchange_rate', schema, 'date')
+
+            if payload['date'] == next_date:
                 singer.write_records('exchange_rate', [parse_response(payload)])
-                state = {'start_date': next_date}
-                next_date = (datetime.strptime(next_date, DATE_FORMAT) + timedelta(days=1)).strftime(DATE_FORMAT)
+
+            state = {'start_date': next_date}
+            next_date = (datetime.strptime(next_date, DATE_FORMAT) + timedelta(days=1)).strftime(DATE_FORMAT)
+            prev_schema = copy.deepcopy(schema)
 
     except requests.exceptions.RequestException as e:
         logger.fatal('Error on ' + e.request.url +
