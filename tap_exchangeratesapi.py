@@ -27,8 +27,7 @@ def parse_response(r):
 schema = {'type': 'object',
           'properties':
           {'date': {'type': 'string',
-                    'format': 'date-time'}},
-          'additionalProperties': False}
+                    'format': 'date-time'}}}
 
 def giveup(error):
     logger.error(error.response.text)
