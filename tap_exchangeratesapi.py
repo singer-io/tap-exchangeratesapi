@@ -47,14 +47,15 @@ def request(url, params):
     return response
     
 def do_sync(base, start_date):
-    logger.info('Replicating exchange rate data from exchangeratesapi.io starting from {}'.format(start_date))
-
     state = {'start_date': start_date}
     next_date = start_date
     prev_schema = {}
     
     try:
         while datetime.strptime(next_date, DATE_FORMAT) <= datetime.utcnow():
+            logger.info('Replicating exchange rate data from %s',
+                        next_date)
+
             response = request(base_url + next_date, {'base': base})
             payload = response.json()
 
