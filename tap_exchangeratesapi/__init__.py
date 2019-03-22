@@ -53,8 +53,9 @@ def do_sync(base, start_date):
     
     try:
         while datetime.strptime(next_date, DATE_FORMAT) <= datetime.utcnow():
-            logger.info('Replicating exchange rate data from %s',
-                        next_date)
+            logger.info('Replicating exchange rate data from %s using base %s',
+                        next_date,
+                        base)
 
             response = request(base_url + next_date, {'base': base})
             payload = response.json()
