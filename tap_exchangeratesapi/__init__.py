@@ -9,7 +9,7 @@ import backoff
 import copy
 
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Dict, Any
 
 import singer
 from .discovery import discover
@@ -51,10 +51,10 @@ def request(url, params):
     response.raise_for_status()
     return response
 
-def do_sync(base, start_date):
+def do_sync(base, start_date, catalog_override: Dict[str, Any] = None):
     state = {'start_date': start_date}
     next_date = start_date
-    prev_schema = {}
+    prev_schema: Dict[str, Any] = {}
 
     try:
         while datetime.strptime(next_date, DATE_FORMAT) <= datetime.utcnow():
@@ -75,7 +75,38 @@ def do_sync(base, start_date):
                 singer.write_schema('exchange_rate', schema, 'date')
 
             if payload['date'] == next_date:
-                singer.write_records('exchange_rate', [parse_response(payload)])
+                if catalog_override:
+                    catalog_stream_override = [
+                        x for x in catalog_override["streams"]
+                        if x["tap_stream_id"] == "exchange_rate"
+                    ]
+                    if not catalog_stream_override:
+                        raise ValueError(
+                            "Stream 'exchange_rate' not found in "
+                            f"json: {catalog_override}"
+                        )
+                    # else:
+                    #     logger.info(catalog_stream_override)
+                    metadata_override = catalog_stream_override[0]["metadata"]
+                    if not metadata_override:
+                        raise ValueError(
+                            "Metadata not found in "
+                            f"json: {catalog_override}"
+                        )
+                    # else:
+                    #     logger.info(metadata_override)
+                    logger.info("Replicating with provided catalog file override")
+                    for record in [parse_response(payload)]:
+                        singer.write_record(
+                            'exchange_rate',
+                            singer.Transformer().transform(
+                                data=record,
+                                schema=catalog_stream_override[0]["schema"],
+                                # metadata=metadata_override, # TODO: debug (not working)
+                            )
+                        )
+                else:
+                    singer.write_records('exchange_rate', [parse_response(payload)])
 
             state = {'start_date': next_date}
             next_date = (datetime.strptime(next_date, DATE_FORMAT) + timedelta(days=1)).strftime(DATE_FORMAT)
@@ -96,11 +127,13 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-d', '--discover', help='Run discovery', required=False, action='store_true')
+        '-d', '--discover', help='Do schema discovery', required=False, action='store_true')
     parser.add_argument(
         '-c', '--config', help='Config file', required=False)
     parser.add_argument(
         '-s', '--state', help='State file', required=False)
+    parser.add_argument(
+        '--catalog', help='Catalog file', required=False)
 
     args = parser.parse_args()
 
@@ -109,6 +142,11 @@ def main():
         catalog = discover()
         singer.catalog.write_catalog(catalog)
         return
+
+    catalog_override: Dict = None
+    if args.catalog:
+        with open(args.catalog) as file:
+            catalog_override = json.load(file)
 
     # Otherwise run in sync mode
     if args.config:
@@ -126,7 +164,7 @@ def main():
     start_date = state.get('start_date') or config.get('start_date') or datetime.utcnow().strftime(DATE_FORMAT)
     start_date = singer.utils.strptime_with_tz(start_date).date().strftime(DATE_FORMAT)
 
-    do_sync(config.get('base', 'USD'), start_date)
+    do_sync(config.get('base', 'USD'), start_date, catalog_override=catalog_override)
 
 
 if __name__ == '__main__':
