@@ -5,18 +5,23 @@ import sys
 import argparse
 import time
 import requests
-import singer
 import backoff
 import copy
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
+from typing import List
+
+import singer
+from .discovery import discover
+
 
 base_url = 'https://api.exchangeratesapi.io/'
 
 logger = singer.get_logger()
 session = requests.Session()
 
-DATE_FORMAT='%Y-%m-%d'
+DATE_FORMAT: str = '%Y-%m-%d'
+REQUIRED_CONFIG_KEYS: List[str] = []  # All config keys are optional
 
 def parse_response(r):
     flattened = r['rates']
@@ -45,12 +50,12 @@ def request(url, params):
     response = requests.get(url=url, params=params)
     response.raise_for_status()
     return response
-    
+
 def do_sync(base, start_date):
     state = {'start_date': start_date}
     next_date = start_date
     prev_schema = {}
-    
+
     try:
         while datetime.strptime(next_date, DATE_FORMAT) <= datetime.utcnow():
             logger.info('Replicating exchange rate data from %s using base %s',
@@ -91,12 +96,21 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        '-d', '--discover', help='Run discovery', required=False, action='store_true')
+    parser.add_argument(
         '-c', '--config', help='Config file', required=False)
     parser.add_argument(
         '-s', '--state', help='State file', required=False)
 
     args = parser.parse_args()
 
+    # If discover flag was passed, run discovery mode and dump output to stdout
+    if args.discover:
+        catalog = discover()
+        singer.catalog.write_catalog(catalog)
+        return
+
+    # Otherwise run in sync mode
     if args.config:
         with open(args.config) as file:
             config = json.load(file)
