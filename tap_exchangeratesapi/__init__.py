@@ -102,7 +102,7 @@ def do_sync(base, start_date, catalog_override: Dict[str, Any] = None):
                             singer.Transformer().transform(
                                 data=record,
                                 schema=catalog_stream_override[0]["schema"],
-                                # metadata=metadata_override, # TODO: debug (not working)
+                                metadata=catalog_stream_override[0],
                             )
                         )
                 else:
