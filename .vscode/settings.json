@@ -1,0 +1,7 @@
+{
+    "[ptyhon]": {
+        // Prevent auto-format until `black` auto-formatter is adopted:
+        "editor.formatOnSave": false
+    },
+    "editor.formatOnSave": false,
+}
