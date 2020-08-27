@@ -22,5 +22,6 @@ setup(name='tap-exchangeratesapi',
           tap-exchangeratesapi=tap_exchangeratesapi:main
       ''',
       packages=['tap_exchangeratesapi'],
+      package_data={"schemas": ["tap_exchangeratesapi/schemas/*.json"]},
       include_package_data=True
 )
