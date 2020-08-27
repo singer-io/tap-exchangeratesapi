@@ -17,7 +17,7 @@ def _get_abs_path(path):
 
 
 # Load schemas from schemas folder
-def _load_schemas():
+def _load_stream_schemas():
     schemas = {}
     for filename in os.listdir(_get_abs_path("schemas")):
         path = _get_abs_path("schemas") + "/" + filename
@@ -38,13 +38,13 @@ def discover() -> Dict[str, Dict[str, Any]]:
     """
     LOGGER.info("Starting discovery mode")
     streams = []
-    for stream_name, schema in _load_schemas().items():
+    for stream_name, stream in _load_stream_schemas().items():
         catalog_entry = {
             "stream": stream_name,
             "tap_stream_id": stream_name,
-            "schema": schema,
+            "schema": stream["schema"],
             "metadata": metadata.get_standard_metadata(
-                schema=schema["schema"],
+                schema=stream["schema"],
                 key_properties=["date"],
                 valid_replication_keys=["date"],
                 replication_method=REPLICATION_METHOD,
