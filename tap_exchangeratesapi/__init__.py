@@ -127,13 +127,13 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-d', '--discover', help='Do schema discovery', required=False, action='store_true')
+        '-d', '--discover', help='Do schema discovery (optional).', required=False, action='store_true')
     parser.add_argument(
-        '-c', '--config', help='Config file', required=False)
+        '-c', '--config', help='Optional config file.', required=False)
     parser.add_argument(
-        '-s', '--state', help='State file', required=False)
+        '-s', '--state', help='Optional state file.', required=False)
     parser.add_argument(
-        '--catalog', help='Catalog file', required=False)
+        '--catalog', help='Optional catalog file.', required=False)
 
     args = parser.parse_args()
 
