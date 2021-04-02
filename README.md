@@ -1,7 +1,7 @@
 # tap-exchangeratesapi
 
 A [Singer](https://singer.io) Tap to extract currency exchange rate
-data from [exchangeratesapi.io](http://exchangeratesapi.io).
+data from [ratesapi.io](http://ratesapi.io).
 
 ---
 
