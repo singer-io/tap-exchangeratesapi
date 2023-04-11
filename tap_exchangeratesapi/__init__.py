@@ -41,12 +41,12 @@ def giveup(error):
                       max_tries=5,
                       giveup=giveup,
                       interval=30)
-def request(url, params):
-    response = requests.get(url=url, params=params)
+def request(url, params, headers):
+    response = requests.get(url=url, params=params,headers=headers)
     response.raise_for_status()
     return response
     
-def do_sync(base, start_date):
+def do_sync(base, start_date, request_headers):
     state = {'start_date': start_date}
     next_date = start_date
     prev_schema = {}
@@ -57,7 +57,7 @@ def do_sync(base, start_date):
                         next_date,
                         base)
 
-            response = request(base_url + next_date, {'base': base})
+            response = request(base_url + next_date, {'base': base},request_headers)
             payload = response.json()
 
             # Update schema if new currency/currencies exist
@@ -112,7 +112,7 @@ def main():
     start_date = state.get('start_date') or config.get('start_date') or datetime.utcnow().strftime(DATE_FORMAT)
     start_date = singer.utils.strptime_with_tz(start_date).date().strftime(DATE_FORMAT)
 
-    do_sync(config.get('base', 'USD'), start_date)
+    do_sync(config.get('base', 'USD'), start_date, config.get('apikey'))
 
 
 if __name__ == '__main__':
