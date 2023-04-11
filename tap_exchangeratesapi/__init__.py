@@ -46,7 +46,7 @@ def request(url, params, headers):
     response.raise_for_status()
     return response
     
-def do_sync(base, start_date, request_headers):
+def do_sync(base, start_date, apikey):
     state = {'start_date': start_date}
     next_date = start_date
     prev_schema = {}
@@ -57,7 +57,7 @@ def do_sync(base, start_date, request_headers):
                         next_date,
                         base)
 
-            response = request(base_url + next_date, {'base': base},request_headers)
+            response = request(base_url + next_date, {'base': base}, {'apikey':apikey})
             payload = response.json()
 
             # Update schema if new currency/currencies exist
@@ -112,7 +112,7 @@ def main():
     start_date = state.get('start_date') or config.get('start_date') or datetime.utcnow().strftime(DATE_FORMAT)
     start_date = singer.utils.strptime_with_tz(start_date).date().strftime(DATE_FORMAT)
 
-    do_sync(config.get('base', 'USD'), start_date, config.get('apikey'))
+    do_sync(config.get('base', 'USD'), start_date, config.get('apikey',''))
 
 
 if __name__ == '__main__':
