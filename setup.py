@@ -7,20 +7,12 @@ setup(name='tap-exchangeratesapi',
       description='Singer.io tap for extracting currency exchange rate data from the exchangeratesapi.io API by Adswerve',
       author='Adswerve',
       url='http://github.com/adswerve/tap-exchangeratesapi',
-      classifiers=['Programming Language :: Python :: 3 :: Only'],
-      py_modules=['tap_exchangeratesapi'],
-      install_requires=['singer-python==5.3.3',
-                        'backoff==1.3.2',
-                        'requests==2.21.0'],
-      extras_require={
-          'dev': [
-              'ipdb==0.11'
-          ]
-      },
+      download_url='https://github.com/adswerve/tap-exchangeratesapi/archive/refs/tags/1.0.1.zip',
+      install_requires=['singer-python==5.13.0',
+                        'backoff==2.2.1',
+                        'requests==2.28.2'],
       entry_points='''
           [console_scripts]
           tap-exchangeratesapi=tap_exchangeratesapi:main
-      ''',
-      packages=['tap_exchangeratesapi'],
-      include_package_data=True
+      '''
 )
