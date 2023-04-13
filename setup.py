@@ -3,10 +3,10 @@
 from setuptools import setup, find_packages
 
 setup(name='tap-exchangeratesapi',
-      version='0.1.1',
-      description='Singer.io tap for extracting currency exchange rate data from the exchangeratesapi.io API',
-      author='Stitch',
-      url='http://github.com/singer-io/tap-exchangeratesapi',
+      version='1.0.1',
+      description='Singer.io tap for extracting currency exchange rate data from the exchangeratesapi.io API by Adswerve',
+      author='Adswerve',
+      url='http://github.com/adswerve/tap-exchangeratesapi',
       classifiers=['Programming Language :: Python :: 3 :: Only'],
       py_modules=['tap_exchangeratesapi'],
       install_requires=['singer-python==5.3.3',
