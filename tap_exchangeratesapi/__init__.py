@@ -19,8 +19,10 @@ session = requests.Session()
 DATE_FORMAT='%Y-%m-%d'
 
 def parse_response(r):
-    flattened = r['rates']
-    flattened[r['base']] = 1.0
+    #flattened = r['rates']
+    flattened = {}
+    flattened['base'] = r['base']
+    flattened['rates'] = json.dumps(r['rates'])
     flattened['date'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.strptime(r['date'], DATE_FORMAT))
     return flattened
 
