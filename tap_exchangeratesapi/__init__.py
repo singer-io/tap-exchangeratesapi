@@ -18,15 +18,7 @@ session = requests.Session()
 
 DATE_FORMAT='%Y-%m-%d'
 
-def parse_response(r):
-    #flattened = r['rates']
-    flattened = {}
-    flattened['base'] = r['base']
-    flattened['rates'] = json.dumps(r['rates'])
-    flattened['date'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.strptime(r['date'], DATE_FORMAT))
-    return flattened
-
-schema = {'type': 'object',
+SCHEMA = {'type': 'object',
           'properties':
             {'date': {'type': 'string',
                     'format': 'date-time'},
@@ -34,12 +26,18 @@ schema = {'type': 'object',
              }
           }
 
+def parse_response(r):
+    #flattened = r['rates']
+    flattened = {}
+    flattened['base'] = r['base']
+    flattened['rates'] = json.dumps(r['rates'])
+    flattened['date'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.strptime(r['date'], DATE_FORMAT))
+    return flattened
 def giveup(error):
     logger.error(error.response.text)
     response = error.response
     return not (response.status_code == 429 or
                 response.status_code >= 500)
-
 @backoff.on_exception(backoff.constant,
                       (requests.exceptions.RequestException),
                       jitter=backoff.random_jitter,
@@ -55,6 +53,7 @@ def do_sync(base, start_date, apikey):
     state = {'start_date': start_date}
     next_date = start_date
     # prev_schema = {}
+    singer.write_schema('exchange_rate', SCHEMA, 'date')
     
     try:
         while datetime.strptime(next_date, DATE_FORMAT) <= datetime.utcnow():
